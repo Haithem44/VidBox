@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">VidBox</string>
+    <string name="pick_folder">اختيار مجلد</string>
+    <string name="change_folder">تغيير المجلد</string>
+    <string name="search_hint">ابحث في الفيديوهات</string>
+    <string name="empty_title">لا توجد فيديوهات بعد</string>
+    <string name="empty_hint">اختر مجلداً يحتوي على فيديوهات لتظهر هنا</string>
+    <string name="error_folder">تعذّر فتح المجلد. اختره من جديد</string>
+    <string name="error_play">تعذّر تشغيل هذا الفيديو</string>
+    <string name="video_count">%d فيديو</string>
+</resources>
