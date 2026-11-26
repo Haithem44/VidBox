@@ -1,115 +1,111 @@
-package com.vidbox.app
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
-import android.content.Intent
-import android.net.Uri
-import android.os.Bundle
-import android.provider.DocumentsContract
-import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.ListView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.media3.common.MediaItem
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.PlayerView
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/playerView"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:background="#000000"
+        app:show_buffering="when_playing" />
 
-class MainActivity : AppCompatActivity() {
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/searchLayout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="12dp"
+        android:hint="@string/search_hint"
+        app:startIconDrawable="@android:drawable/ic_menu_search">
 
-    private var player: ExoPlayer? = null
-    private lateinit var playerView: PlayerView
-    private lateinit var adapter: ArrayAdapter<String>
-    private val names = ArrayList<String>()
-    private val uris = ArrayList<Uri>()
-    private val reqFolder = 101
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/searchInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        <TextView
+            android:id="@+id/countText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?attr/textAppearanceTitleSmall" />
 
-        val root = LinearLayout(this)
-        root.orientation = LinearLayout.VERTICAL
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/changeFolderBtn"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/change_folder" />
+    </LinearLayout>
 
-        val pickBtn = Button(this)
-        pickBtn.text = "اختيار المجلد"
-        pickBtn.setOnClickListener {
-            val i = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-            startActivityForResult(i, reqFolder)
-        }
-        root.addView(pickBtn, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        playerView = PlayerView(this)
-        root.addView(playerView, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, dp(220)))
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="8dp" />
 
-        val listView = ListView(this)
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, names)
-        listView.adapter = adapter
-        listView.setOnItemClickListener { _, _, pos, _ -> play(uris[pos]) }
-        root.addView(listView, LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+        <LinearLayout
+            android:id="@+id/emptyState"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="32dp">
 
-        setContentView(root)
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/empty_title"
+                android:textAppearance="?attr/textAppearanceTitleLarge" />
 
-        val saved = getSharedPreferences("vidbox", MODE_PRIVATE).getString("folder", null)
-        if (saved != null) {
-            try {
-                loadFolder(Uri.parse(saved))
-            } catch (e: Exception) {
-            }
-        }
-    }
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="@string/empty_hint"
+                android:textAppearance="?attr/textAppearanceBodyMedium" />
 
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == reqFolder && resultCode == RESULT_OK && data?.data != null) {
-            val uri = data.data!!
-            contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            getSharedPreferences("vidbox", MODE_PRIVATE).edit().putString("folder", uri.toString()).apply()
-            loadFolder(uri)
-        }
-    }
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/emptyPickBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/pick_folder" />
+        </LinearLayout>
 
-    private fun loadFolder(treeUri: Uri) {
-        names.clear()
-        uris.clear()
-        val treeId = DocumentsContract.getTreeDocumentId(treeUri)
-        val children = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, treeId)
-        val cols = arrayOf(
-            DocumentsContract.Document.COLUMN_DOCUMENT_ID,
-            DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-            DocumentsContract.Document.COLUMN_MIME_TYPE
-        )
-        contentResolver.query(children, cols, null, null, null)?.use { c ->
-            while (c.moveToNext()) {
-                val id = c.getString(0)
-                val name = c.getString(1)
-                val mime = c.getString(2) ?: ""
-                if (mime.startsWith("video/")) {
-                    names.add(name)
-                    uris.add(DocumentsContract.buildDocumentUriUsingTree(treeUri, id))
-                }
-            }
-        }
-        adapter.notifyDataSetChanged()
-    }
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone" />
+    </FrameLayout>
 
-    private fun play(uri: Uri) {
-        player?.release()
-        val p = ExoPlayer.Builder(this).build()
-        playerView.player = p
-        p.setMediaItem(MediaItem.fromUri(uri))
-        p.prepare()
-        p.play()
-        player = p
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        player?.release()
-        player = null
-    }
-}
+</LinearLayout>
